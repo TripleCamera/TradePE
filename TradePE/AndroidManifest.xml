@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.triplecamera.tradepe"
+          android:versionCode="1"
+          android:versionName="0.1">
+    
+    <!-- MCPE supports SDK 9+ (Android 2.3+) -->
+    <uses-sdk android:minSdkVersion="9" />
+    
+    <application android:hasCode="false"
+                 android:icon="@drawable/icon"
+                 android:label="@string/app_name" />
+    
+</manifest> 

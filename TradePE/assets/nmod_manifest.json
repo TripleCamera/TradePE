@@ -1,0 +1,37 @@
+{
+  "name" : "Trade PE",
+  
+  "package_name" : "com.triplecamera.tradepe",
+  
+  "author" : "TripleCamera",
+  
+  "native_libs_info" :
+  [
+    {
+      "name" : "libtradepe.so",
+      "use_api" : "false"
+    }
+  ],
+  
+  "version_code" : 1,
+  
+  "version_name" : "0.1",
+  
+  "minecraft_version_name" : "0.12.1",
+  
+  "description" : "Trade! ",
+  
+  "change_log" : "",
+  
+  
+  "banner_title" : "",
+  
+  //The image must be the size of 1024(width)*500(height)!
+  "banner_image_path" : "banner.png"
+  
+  
+  //Assest Text Edit API
+  
+  //Assest Json Edit API
+  
+}

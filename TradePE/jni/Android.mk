@@ -7,5 +7,6 @@ LOCAL_SRC_FILES_RAW := $(shell find $(LOCAL_PATH) -name '*.cpp')  \
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES_RAW:$(LOCAL_PATH)/%=%)
 LOCAL_LDFLAGS := -L$(LOCAL_PATH)/$(TARGET_ARCH_ABI)  \
                  -llog -ldl -lsubstrate -lminecraftpe
+TARGET_NO_UNDEFINED_LDFLAGS :=
 
 include $(BUILD_SHARED_LIBRARY)

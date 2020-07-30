@@ -20,14 +20,18 @@
 #include <dlfcn.h>
 #include <sys/mman.h>
 #include <android/log.h>
+#include <string>
 #include "Substrate.h"
 #include "mcpe/mcpe.h"
 
 #define LOG_TAG "TradePE"
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 
-static bool Villager_canInteract(Villager*, Player*)
+static bool Villager_canInteractWith(Villager*, Player*)
 { return true; }
+
+static std::string Villager_getInteractText(Villager*, Player*)
+{ return "Trade"; }
 
 void vtable_hook(void** vtable, void* symbol, void* hook)
 {
@@ -36,14 +40,13 @@ void vtable_hook(void** vtable, void* symbol, void* hook)
         addr++;
     int pagesize = getpagesize();
     void* page = (void*)((unsigned int)addr / pagesize * pagesize);
-    LOGI("Vtable hook 0x%x, mprotect page 0x%x",
-         (unsigned int)vtable, (unsigned int)page);
+    LOGI("Vtable hook: addr = 0x%x", (unsigned int)addr);
 
     int result = mprotect(page, pagesize, PROT_READ | PROT_WRITE);
     if (result == 0)
-        LOGI("mprotect succeeded");
+        LOGI("mprotect(0x%x) succeeded", (unsigned int)page);
     else
-        LOGI("mprotect failed, errno %d\n", errno);
+        LOGI("mprotect(0x%x) failed, errno %d\n", (unsigned int)page, errno);
     *addr = hook;
     mprotect(page, pagesize, PROT_READ | PROT_EXEC);
 }
@@ -54,7 +57,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM*, void*)
     void* vtable_Villager = dlsym(handle, "_ZTV8Villager");
     vtable_hook( (void**) vtable_Villager,
                  (void* ) &Entity::canInteractWith,
-                 (void* ) &Villager_canInteract );
+                 (void* ) &Villager_canInteractWith );
+    vtable_hook( (void**) vtable_Villager,
+                 (void* ) &Entity::getInteractText,
+                 (void* ) &Villager_getInteractText );
     dlclose(handle);
     return JNI_VERSION_1_6;
 }

@@ -16,30 +16,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <jni.h>
-#include <dlfcn.h>
-#include <sys/mman.h>
-#include <android/log.h>
-#include <string>
-#include "Substrate.h"
 #include "mcpe/mcpe.h"
 
-#define LOG_TAG "TradePE"
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__))
 
-static bool Villager_canInteractWith(Villager*, Player*)
-{ return true; }
+static bool Villager_canInteractWith(Villager *self, Player *p)
+{ return !(self -> isTrading()); }
 
 static std::string Villager_getInteractText(Villager*, Player*)
 { return "Trade"; }
 
-void vtable_hook(void** vtable, void* symbol, void* hook)
+static void Villager_interactWithPlayer(Villager *v, Player *p)
 {
-    void** addr = vtable;
+    if ( !(Villager_canInteractWith(v,p)) )
+    {
+        LOGI("Fail");
+        return;
+    }
+    LOGI("Interact");
+    // ???
+    //p -> openTradeScreen(v);
+}
+
+void vtable_hook(void **vtable, void *symbol, void *hook)
+{
+    void **addr = vtable;
     while ((*addr) != symbol)
         addr++;
     int pagesize = getpagesize();
-    void* page = (void*)((unsigned int)addr / pagesize * pagesize);
+    void *page = (void*)((unsigned int)addr / pagesize * pagesize);
     LOGI("Vtable hook: addr = 0x%x", (unsigned int)addr);
 
     int result = mprotect(page, pagesize, PROT_READ | PROT_WRITE);
@@ -53,14 +57,17 @@ void vtable_hook(void** vtable, void* symbol, void* hook)
 
 JNIEXPORT jint JNI_OnLoad(JavaVM*, void*)
 {
-    void* handle = dlopen("libminecraftpe.so", RTLD_LAZY);
-    void* vtable_Villager = dlsym(handle, "_ZTV8Villager");
+    void *handle = dlopen("libminecraftpe.so", RTLD_LAZY);
+    void *vtable_Villager = dlsym(handle, "_ZTV8Villager");
     vtable_hook( (void**) vtable_Villager,
                  (void* ) &Entity::canInteractWith,
                  (void* ) &Villager_canInteractWith );
     vtable_hook( (void**) vtable_Villager,
                  (void* ) &Entity::getInteractText,
                  (void* ) &Villager_getInteractText );
+    vtable_hook( (void**) vtable_Villager,
+                 (void* ) &Villager::interactWithPlayer,
+                 (void* ) &Villager_interactWithPlayer );
     dlclose(handle);
     return JNI_VERSION_1_6;
 }
